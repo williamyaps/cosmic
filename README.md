@@ -1,2 +1,2 @@
 # cosmic
-kalikulator zodia
+kalikulator zodiac
