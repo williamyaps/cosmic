@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌌 Kosmik Pro Max — Ultimate Astrology Workbench</title>
+
+    <!-- ═══ LIBRARY DARI META ═══ -->
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- ═══ LIBRARY DARI GEMINI ═══ -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* ═══ KUSTOM STYLE ═══ */
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0f0f2a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(251, 191, 36, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px -10px rgba(251, 191, 36, 0.3);
+        }
+        .tab-active {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #0a0a1a !important;
+            font-weight: 700;
+        }
+        .card-gradient-shio { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); border-color: rgba(239, 68, 68, 0.3); }
+        .card-gradient-zodiak { background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.05)); border-color: rgba(168, 85, 247, 0.3); }
+        .card-gradient-planet { background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05)); border-color: rgba(59, 130, 246, 0.3); }
+        .card-gradient-elemen { background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05)); border-color: rgba(34, 197, 94, 0.3); }
+        .card-gradient-weton { background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.05)); border-color: rgba(251, 191, 36, 0.3); }
+        .detail-card { transition: all 0.3s ease; cursor: pointer; }
+        .detail-card:hover { transform: scale(1.02); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        
+        /* Scroll bar khusus */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1a3a; }
+        ::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 10px; }
+
+        .comparison-table td, .comparison-table th {
+            border: 1px solid #4b3f72;
+            padding: 10px 12px;
+            vertical-align: top;
+        }
+        .aspect-label { background: #2a234b !important; font-weight: 700; color: #f0e5ff; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-64 h-64 bg-gold-500/10 rounded-full blur-3xl top-10 left-20"></div>
+        <div class="absolute w-96 h-96 bg-purple-500/10 rounded-full blur-3xl bottom-10 right-10"></div>
+    </div>
+    <div class="relative z-10 text-center max-w-5xl mx-auto">
+        <div class="mb-8 animate-float">
+            <img src="https://wlmyaps.github.io/cosmic/12%20astrology.png" alt="Kosmik" class="w-full max-w-2xl mx-auto rounded-2xl shadow-2xl border-2 border-gold-500/30" onerror="this.src='https://via.placeholder.com/800x400/1a1a3a/fbbf24?text=KOSMIK+PRO+MAX'">
+        </div>
+        <h1 class="text-5xl md:text-7xl font-black mb-4 bg-gradient-to-r from-gold-400 via-yellow-300 to-gold-500 bg-clip-text text-transparent drop-shadow-lg">
+            Kosmik Pro Max
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mb-2">Shio • Zodiak • Planet • Elemen • Weton • Kompatibilitas</p>
+        <p class="text-base text-gray-400 max-w-2xl mx-auto mb-12">
+            Kalkulator astrologi super lengkap. Bandingkan hingga 10 profil dengan grafik radar, ekspor Excel, screenshot, dan data langit real-time.
+        </p>
+        <button onclick="document.getElementById('main-content').scrollIntoView({behavior:'smooth'})" 
+                class="px-8 py-4 bg-gradient-to-r from-gold-500 to-gold-600 text-cosmic-900 font-bold rounded-full text-lg hover:scale-105 transition-transform shadow-lg shadow-gold-500/30">
+            <i class="fas fa-rocket mr-2"></i> Jelajahi Sekarang ↓
+        </button>
+    </div>
+</header>
+
+<!-- ═══ NAVIGASI TAB ═══ -->
+<div id="main-content" class="sticky top-0 z-50 glass border-b border-white/10 py-4 px-4">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-center gap-2 md:gap-4 overflow-x-auto scrollbar-hide">
+        <button onclick="switchTab('kalkulator')" id="tab-kalkulator" class="tab-btn px-6 py-3 rounded-full glass tab-active transition-all whitespace-nowrap">
+            <i class="fas fa-calculator mr-2"></i> Kalkulator
+        </button>
+        <button onclick="switchTab('shio')" id="tab-shio" class="tab-btn px-6 py-3 rounded-full glass transition-all whitespace-nowrap">🐉 Shio (12)</button>
+        <button onclick="switchTab('zodiak')" id="tab-zodiak" class="tab-btn px-6 py-3 rounded-full glass transition-all whitespace-nowrap">✨ Zodiak (12)</button>
+        <button onclick="switchTab('planet')" id="tab-planet" class="tab-btn px-6 py-3 rounded-full glass transition-all whitespace-nowrap">🪐 Planet (8)</button>
+        <button onclick="switchTab('elemen')" id="tab-elemen" class="tab-btn px-6 py-3 rounded-full glass transition-all whitespace-nowrap">🔥 Elemen (5)</button>
+        <button onclick="switchTab('weton')" id="tab-weton" class="tab-btn px-6 py-3 rounded-full glass transition-all whitespace-nowrap">📅 Weton (35)</button>
+    </div>
+</div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<main class="max-w-7xl mx-auto px-4 py-8">
+
+    <!-- ─── TAB 1: KALKULATOR ─── -->
+    <section id="content-kalkulator" class="tab-content animate-fade-in">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gold-400 to-orange-400 bg-clip-text text-transparent">
+                <i class="fas fa-user-astronaut mr-3"></i> Kalkulator Kompatibilitas
+            </h2>
+            <p class="text-gray-400 max-w-2xl mx-auto">Masukkan beberapa tanggal lahir untuk melihat shio, zodiak, weton, skor kecocokan, dan grafik radar.</p>
+        </div>
+
+        <!-- Form Input -->
+        <div class="glass rounded-2xl p-6 mb-8 border border-gold-500/30">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">📛 Nama</label>
+                    <input type="text" id="inputNama" placeholder="Contoh: Bunga" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">📅 Tanggal</label>
+                    <input type="number" id="inputTanggal" placeholder="15" min="1" max="31" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">📆 Bulan</label>
+                    <input type="number" id="inputBulan" placeholder="5" min="1" max="12" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">📅 Tahun</label>
+                    <input type="number" id="inputTahun" placeholder="1994" min="1900" max="2100" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+                <div>
+                    <button onclick="tambahProfil()" class="w-full bg-gold-500 hover:bg-gold-600 text-cosmic-900 font-bold py-2 px-4 rounded-xl transition-all shadow-lg shadow-gold-500/30">
+                        <i class="fas fa-plus mr-2"></i> Tambah
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">🌍 Lintang (Latitude) opsional</label>
+                    <input type="text" id="inputLat" placeholder="-6.2" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-400 block mb-1">🌏 Bujur (Longitude) opsional</label>
+                    <input type="text" id="inputLng" placeholder="106.8" class="w-full px-4 py-2 rounded-xl bg-black/30 border border-white/10 text-white focus:border-gold-500 focus:outline-none">
+                </div>
+            </div>
+        </div>
+
+        <!-- Daftar Profil -->
+        <div class="glass rounded-2xl p-4 mb-6 border border-white/10">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gold-400"><i class="fas fa-users mr-2"></i> Profil Terdaftar</h3>
+                <span class="text-sm text-gray-400" id="jumlahProfil">0 profil</span>
+            </div>
+            <div id="daftarProfil" class="overflow-x-auto">
+                <p class="text-gray-500 text-center py-8">✨ Belum ada profil. Tambahkan tanggal lahir di atas!</p>
+            </div>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="flex flex-wrap gap-4 mb-8">
+            <button onclick="bandingkan()" class="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-green-500/30 hover:scale-105 transition-all">
+                <i class="fas fa-chart-pie mr-2"></i> Bandingkan Kosmik
+            </button>
+            <button onclick="hapusSemua()" class="bg-red-500/20 border border-red-500 text-red-400 font-bold py-3 px-6 rounded-xl hover:bg-red-500/30 transition-all">
+                <i class="fas fa-trash mr-2"></i> Hapus Semua
+            </button>
+            <button onclick="simpanProject()" class="bg-blue-500/20 border border-blue-500 text-blue-400 font-bold py-3 px-6 rounded-xl hover:bg-blue-500/30 transition-all">
+                <i class="fas fa-save mr-2"></i> Simpan
+            </button>
+            <button onclick="loadProject()" class="bg-purple-500/20 border border-purple-500 text-purple-400 font-bold py-3 px-6 rounded-xl hover:bg-purple-500/30 transition-all">
+                <i class="fas fa-folder-open mr-2"></i> Muat
+            </button>
+        </div>
+
+        <!-- Hasil Perbandingan -->
+        <div id="hasilPerbandingan" class="glass rounded-2xl p-6 border border-gold-500/30 hidden">
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <h3 class="text-2xl font-bold text-gold-400"><i class="fas fa-star mr-2"></i> Hasil Analisis</h3>
+                <div class="flex gap-2">
+                    <button onclick="screenshotHasil()" class="bg-cyan-500/20 border border-cyan-500 text-cyan-400 font-bold py-2 px-4 rounded-xl text-sm hover:bg-cyan-500/30 transition-all">
+                        <i class="fas fa-camera mr-1"></i> Screenshot
+                    </button>
+                    <button onclick="exportExcel()" class="bg-green-500/20 border border-green-500 text-green-400 font-bold py-2 px-4 rounded-xl text-sm hover:bg-green-500/30 transition-all">
+                        <i class="fas fa-file-excel mr-1"></i> Excel
+                    </button>
+                </div>
+            </div>
+            <div id="hasilContainer" class="overflow-x-auto"></div>
+            <div id="chartContainer" class="mt-8" style="height: 400px;">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── TAB 2: SHIO ─── -->
+    <section id="content-shio" class="tab-content hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">12 Shio Tiongkok</h2>
+            <p class="text-gray-400">Siklus 12 tahun dengan karakteristik unik.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="shio-grid"></div>
+    </section>
+
+    <!-- ─── TAB 3: ZODIAK ─── -->
+    <section id="content-zodiak" class="tab-content hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">12 Zodiak Barat</h2>
+            <p class="text-gray-400">Posisi matahari saat kelahiran membentuk karakter.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="zodiak-grid"></div>
+    </section>
+
+    <!-- ─── TAB 4: PLANET ─── -->
+    <section id="content-planet" class="tab-content hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">8 Planet Tata Surya</h2>
+            <p class="text-gray-400">Data astronomi lengkap.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="planet-grid"></div>
+    </section>
+
+    <!-- ─── TAB 5: ELEMEN ─── -->
+    <section id="content-elemen" class="tab-content hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">5 Elemen Wu Xing</h2>
+            <p class="text-gray-400">Fundamental filosofi Tiongkok.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="elemen-grid"></div>
+        <div class="mt-8 glass rounded-2xl p-6 border border-green-400/30">
+            <h3 class="text-xl font-bold text-green-400">Siklus Wu Xing</h3>
+            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-green-500/10 p-4 rounded-xl border border-green-500/30">
+                    <h4 class="font-bold text-green-300">🔄 Generatif (Melahirkan)</h4>
+                    <p class="text-gray-300">Kayu → Api → Tanah → Logam → Air → Kayu</p>
+                </div>
+                <div class="bg-red-500/10 p-4 rounded-xl border border-red-500/30">
+                    <h4 class="font-bold text-red-300">⚔️ Destruktif (Mengalahkan)</h4>
+                    <p class="text-gray-300">Kayu → Tanah → Air → Api → Logam → Kayu</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── TAB 6: WETON ─── -->
+    <section id="content-weton" class="tab-content hidden">
+        <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold bg-gradient-to-r from-gold-400 to-yellow-400 bg-clip-text text-transparent">35 Weton Jawa</h2>
+            <p class="text-gray-400">Kombinasi 7 hari × 5 pasaran.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" id="weton-grid"></div>
+    </section>
+
+</main>
+
+<!-- ═══ MODAL ═══ -->
+<div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onclick="closeModal(event)">
+    <div class="glass rounded-2xl p-6 md:p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto border border-gold-500/30 animate-fade-in" onclick="event.stopPropagation()">
+        <div class="flex justify-between items-start mb-4">
+            <h3 id="modal-title" class="text-2xl font-bold text-gold-400"></h3>
+            <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div id="modal-body" class="text-gray-300 space-y-3"></div>
+    </div>
+</div>
+
+<footer class="text-center py-8 text-gray-500 border-t border-white/10 mt-12">
+    <p>🌌 Kosmik Pro Max © 2026 — Dibuat dengan <i class="fas fa-heart text-red-500"></i> oleh Bro William Yap</p>
+</footer>
+
+<script>
+    // ═══════════════════════════════════════════════════════════════
+    // 1. DATA LENGKAP (Shio, Zodiak, Planet, Elemen, Weton)
+    // ═══════════════════════════════════════════════════════════════
+
+    const shioData = [
+        { nama: "Tikus (Rat)", emoji: "🐭", tahun: [1924,1936,1948,1960,1972,1984,1996,2008,2020,2032], elemen: "Air", waktu: "23:00-01:00", arah: "Utara", sifatPositif: "Cerdas, adaptif, lincah, optimis", sifatNegatif: "Licik, egois, serakah", keberuntungan: "Angka:2,3 | Warna:Biru,Emas", cocok: "Naga, Monyet, Babi", tidakCocok: "Kuda, Kambing" },
+        { nama: "Kerbau (Ox)", emoji: "🐂", tahun: [1925,1937,1949,1961,1973,1985,1997,2009,2021,2033], elemen: "Tanah", waktu: "01:00-03:00", arah: "Timur Laut", sifatPositif: "Jujur, rajin, tekun, dapat diandalkan", sifatNegatif: "Keras kepala, materialistis", keberuntungan: "Angka:1,4 | Warna:Putih,Kuning", cocok: "Tikus, Ular, Ayam", tidakCocok: "Macan, Kambing" },
+        { nama: "Macan (Tiger)", emoji: "🐯", tahun: [1926,1938,1950,1962,1974,1986,1998,2010,2022,2034], elemen: "Kayu", waktu: "03:00-05:00", arah: "Timur", sifatPositif: "Berani, percaya diri, karismatik", sifatNegatif: "Agresif, arogan, impulsif", keberuntungan: "Angka:1,3,4 | Warna:Biru,Abu-abu", cocok: "Naga, Kuda, Babi", tidakCocok: "Monyet, Ular" },
+        { nama: "Kelinci (Rabbit)", emoji: "🐰", tahun: [1927,1939,1951,1963,1975,1987,1999,2011,2023,2035], elemen: "Kayu", waktu: "05:00-07:00", arah: "Timur", sifatPositif: "Lembut, tenang, anggun, waspada", sifatNegatif: "Pemalu, pesimis, sensitif", keberuntungan: "Angka:3,4,6 | Warna:Merah,Pink", cocok: "Kambing, Monyet, Babi, Anjing", tidakCocok: "Ayam, Naga" },
+        { nama: "Naga (Dragon)", emoji: "🐉", tahun: [1928,1940,1952,1964,1976,1988,2000,2012,2024,2036], elemen: "Tanah", waktu: "07:00-09:00", arah: "Timur", sifatPositif: "Kuasa, ambisius, berani, karismatik", sifatNegatif: "Arogan, tidak sabar, menuntut", keberuntungan: "Angka:1,6,7 | Warna:Emas,Perak", cocok: "Tikus, Macan, Ular, Kambing", tidakCocok: "Kerbau, Kelinci" },
+        { nama: "Ular (Snake)", emoji: "🐍", tahun: [1929,1941,1953,1965,1977,1989,2001,2013,2025,2037], elemen: "Api", waktu: "09:00-11:00", arah: "Tenggara", sifatPositif: "Bijaksana, misterius, intuitif, elegan", sifatNegatif: "Cemburu, curiga, licik", keberuntungan: "Angka:2,8,9 | Warna:Hitam,Merah", cocok: "Naga, Ayam", tidakCocok: "Macan, Kelinci, Kuda" },
+        { nama: "Kuda (Horse)", emoji: "🐴", tahun: [1930,1942,1954,1966,1978,1990,2002,2014,2026,2038], elemen: "Api", waktu: "11:00-13:00", arah: "Selatan", sifatPositif: "Aktif, energik, bebas, petualang", sifatNegatif: "Tidak sabar, impulsif, boros", keberuntungan: "Angka:2,3,7 | Warna:Kuning,Hijau", cocok: "Macan, Kambing, Kelinci", tidakCocok: "Tikus, Kerbau" },
+        { nama: "Kambing (Goat)", emoji: "🐐", tahun: [1931,1943,1955,1967,1979,1991,2003,2015,2027,2039], elemen: "Tanah", waktu: "13:00-15:00", arah: "Barat Daya", sifatPositif: "Lembut, kreatif, elegan, simpatik", sifatNegatif: "Pemalu, pesimis, mudah cemas", keberuntungan: "Angka:2,7 | Warna:Hijau,Merah", cocok: "Kelinci, Kuda, Babi", tidakCocok: "Kerbau, Macan" },
+        { nama: "Monyet (Monkey)", emoji: "🐵", tahun: [1932,1944,1956,1968,1980,1992,2004,2016,2028,2040], elemen: "Logam", waktu: "15:00-17:00", arah: "Barat Daya", sifatPositif: "Cerdas, lucu, energik, percaya diri", sifatNegatif: "Licik, tidak jujur, egois", keberuntungan: "Angka:4,9 | Warna:Putih,Biru", cocok: "Tikus, Naga", tidakCocok: "Macan, Ular" },
+        { nama: "Ayam (Rooster)", emoji: "🐓", tahun: [1933,1945,1957,1969,1981,1993,2005,2017,2029,2041], elemen: "Logam", waktu: "17:00-19:00", arah: "Barat", sifatPositif: "Observatif, rajin, berani, jujur", sifatNegatif: "Kritis, egois, perfeksionis", keberuntungan: "Angka:5,7,8 | Warna:Emas,Coklat", cocok: "Kerbau, Ular, Naga", tidakCocok: "Kelinci, Anjing" },
+        { nama: "Anjing (Dog)", emoji: "🐶", tahun: [1934,1946,1958,1970,1982,1994,2006,2018,2030,2042], elemen: "Tanah", waktu: "19:00-21:00", arah: "Barat Laut", sifatPositif: "Setia, jujur, dapat diandalkan, baik hati", sifatNegatif: "Cemas, keras kepala, defensif", keberuntungan: "Angka:3,4,9 | Warna:Merah,Hijau", cocok: "Kelinci, Macan, Kuda", tidakCocok: "Naga, Kambing" },
+        { nama: "Babi (Pig)", emoji: "🐷", tahun: [1935,1947,1959,1971,1983,1995,2007,2019,2031,2043], elemen: "Air", waktu: "21:00-23:00", arah: "Barat Laut", sifatPositif: "Jujur, murah hati, penyayang, sabar", sifatNegatif: "Naif, materialistis, mudah tertipu", keberuntungan: "Angka:2,5,8 | Warna:Kuning,Abu-abu", cocok: "Macan, Kelinci, Kambing", tidakCocok: "Ular, Monyet" }
+    ];
+
+    const zodiakData = [
+        { nama: "Aries", simbol: "♈", tanggal: "21 Mar - 19 Apr", elemen: "Api", planet: "Mars", sifatPositif: "Berani, energik, antusias", sifatNegatif: "Impulsif, agresif", pekerjaan: "Pengusaha, Atlet", kompatibilitas: "Leo, Sagitarius" },
+        { nama: "Taurus", simbol: "♉", tanggal: "20 Apr - 20 Mei", elemen: "Tanah", planet: "Venus", sifatPositif: "Dapat diandalkan, sabar, setia", sifatNegatif: "Keras kepala, posesif", pekerjaan: "Akuntan, Insinyur", kompatibilitas: "Virgo, Capricorn" },
+        { nama: "Gemini", simbol: "♊", tanggal: "21 Mei - 20 Jun", elemen: "Udara", planet: "Merkurius", sifatPositif: "Penasaran, adaptif, komunikatif", sifatNegatif: "Gugup, tidak konsisten", pekerjaan: "Jurnalis, Penulis", kompatibilitas: "Libra, Aquarius" },
+        { nama: "Cancer", simbol: "♋", tanggal: "21 Jun - 22 Jul", elemen: "Air", planet: "Bulan", sifatPositif: "Intuitif, sentimental, setia", sifatNegatif: "Moody, curiga", pekerjaan: "Perawat, Guru", kompatibilitas: "Scorpio, Pisces" },
+        { nama: "Leo", simbol: "♌", tanggal: "23 Jul - 22 Agu", elemen: "Api", planet: "Matahari", sifatPositif: "Kreatif, murah hati, percaya diri", sifatNegatif: "Arogan, egois", pekerjaan: "Aktor, Manajer", kompatibilitas: "Aries, Sagitarius" },
+        { nama: "Virgo", simbol: "♍", tanggal: "23 Agu - 22 Sep", elemen: "Tanah", planet: "Merkurius", sifatPositif: "Analitis, baik hati, pekerja keras", sifatNegatif: "Terlalu kritis, perfeksionis", pekerjaan: "Dokter, Ilmuwan", kompatibilitas: "Taurus, Capricorn" },
+        { nama: "Libra", simbol: "♎", tanggal: "23 Sep - 22 Okt", elemen: "Udara", planet: "Venus", sifatPositif: "Diplomatik, anggun, adil", sifatNegatif: "Menghindari konflik, pendendam", pekerjaan: "Pengacara, Desainer", kompatibilitas: "Gemini, Aquarius" },
+        { nama: "Scorpio", simbol: "♏", tanggal: "23 Okt - 21 Nov", elemen: "Air", planet: "Pluto/Mars", sifatPositif: "Berani, setia, intuitif", sifatNegatif: "Cemburu, manipulatif", pekerjaan: "Detektif, Ilmuwan", kompatibilitas: "Cancer, Pisces" },
+        { nama: "Sagitarius", simbol: "♐", tanggal: "22 Nov - 21 Des", elemen: "Api", planet: "Jupiter", sifatPositif: "Murah hati, optimis, filosofis", sifatNegatif: "Tidak sabar, ceroboh", pekerjaan: "Pengajar, Penulis", kompatibilitas: "Aries, Leo" },
+        { nama: "Capricorn", simbol: "♑", tanggal: "22 Des - 19 Jan", elemen: "Tanah", planet: "Saturnus", sifatPositif: "Bertanggung jawab, disiplin", sifatNegatif: "Pesimis, egois", pekerjaan: "Manajer, Eksekutif", kompatibilitas: "Taurus, Virgo" },
+        { nama: "Aquarius", simbol: "♒", tanggal: "20 Jan - 18 Feb", elemen: "Udara", planet: "Uranus", sifatPositif: "Progresif, independen, humanistik", sifatNegatif: "Eksentrik, tidak kompromi", pekerjaan: "Ilmuwan, Aktivis", kompatibilitas: "Gemini, Libra" },
+        { nama: "Pisces", simbol: "♓", tanggal: "19 Feb - 20 Mar", elemen: "Air", planet: "Neptunus", sifatPositif: "Welas asih, intuitif, artistik", sifatNegatif: "Takut, terlalu trusting", pekerjaan: "Seniman, Musisi", kompatibilitas: "Cancer, Scorpio" }
+    ];
+
+    const planetData = [
+        { nama: "Merkurius", emoji: "☿", tipe: "Terestrial", jarakMatahari: "57,9 jt km", diameter: "4.879 km", orbit: "88 hari", rotasi: "58,6 hari", suhu: "-173°C s/d 427°C", satelit: "0", fakta: "Planet terkecil & terdekat matahari." },
+        { nama: "Venus", emoji: "♀", tipe: "Terestrial", jarakMatahari: "108,2 jt km", diameter: "12.104 km", orbit: "225 hari", rotasi: "243 hari", suhu: "462°C", satelit: "0", fakta: "Planet terpanas karena efek rumah kaca." },
+        { nama: "Bumi", emoji: "🌍", tipe: "Terestrial", jarakMatahari: "149,6 jt km", diameter: "12.742 km", orbit: "365,25 hari", rotasi: "23 jam 56 min", suhu: "15°C (rata-rata)", satelit: "1 (Bulan)", fakta: "Satu-satunya planet dengan kehidupan." },
+        { nama: "Mars", emoji: "🔴", tipe: "Terestrial", jarakMatahari: "227,9 jt km", diameter: "6.779 km", orbit: "687 hari", rotasi: "24 jam 37 min", suhu: "-153°C s/d 20°C", satelit: "2", fakta: "Planet Merah, punya gunung tertinggi." },
+        { nama: "Jupiter", emoji: "♃", tipe: "Gas Raksasa", jarakMatahari: "778,5 jt km", diameter: "139.820 km", orbit: "11,86 tahun", rotasi: "9 jam 56 min", suhu: "-145°C", satelit: "95", fakta: "Planet terbesar, Bintik Merah Raksasa." },
+        { nama: "Saturnus", emoji: "♄", tipe: "Gas Raksasa", jarakMatahari: "1,43 M km", diameter: "116.460 km", orbit: "29,46 tahun", rotasi: "10 jam 34 min", suhu: "-178°C", satelit: "146", fakta: "Terkenal dengan sistem cincinnya." },
+        { nama: "Uranus", emoji: "⛢", tipe: "Es Raksasa", jarakMatahari: "2,87 M km", diameter: "50.724 km", orbit: "84 tahun", rotasi: "17 jam 14 min", suhu: "-224°C", satelit: "27", fakta: "Berotasi miring 98°." },
+        { nama: "Neptunus", emoji: "♆", tipe: "Es Raksasa", jarakMatahari: "4,50 M km", diameter: "49.244 km", orbit: "164,8 tahun", rotasi: "16 jam 6 min", suhu: "-218°C", satelit: "14", fakta: "Planet terjauh, angin tercepat." }
+    ];
+
+    const elemenData = [
+        { nama: "Kayu (Mu)", emoji: "🌳", warna: "Hijau", musim: "Semi", arah: "Timur", planet: "Jupiter", sifat: "Pertumbuhan, kreativitas, vitalitas", karakterOrang: "Kreatif, visioner, dermawan", siklusGeneratif: "Kayu → Api", siklusDestruktif: "Kayu → Tanah" },
+        { nama: "Api (Huo)", emoji: "🔥", warna: "Merah", musim: "Panas", arah: "Selatan", planet: "Mars", sifat: "Panas, transformasi, gairah", karakterOrang: "Dinamis, karismatik, optimis", siklusGeneratif: "Api → Tanah", siklusDestruktif: "Api → Logam" },
+        { nama: "Tanah (Tu)", emoji: "🏔️", warna: "Kuning", musim: "Peralihan", arah: "Pusat", planet: "Saturnus", sifat: "Stabilitas, nutrisi, keibuan", karakterOrang: "Stabil, sabar, praktis", siklusGeneratif: "Tanah → Logam", siklusDestruktif: "Tanah → Air" },
+        { nama: "Logam (Jin)", emoji: "⚔️", warna: "Putih", musim: "Gugur", arah: "Barat", planet: "Venus", sifat: "Kekuatan, ketegasan, keadilan", karakterOrang: "Tegas, berani, terorganisir", siklusGeneratif: "Logam → Air", siklusDestruktif: "Logam → Kayu" },
+        { nama: "Air (Shui)", emoji: "💧", warna: "Hitam", musim: "Dingin", arah: "Utara", planet: "Merkurius", sifat: "Mengalir, adaptif, bijaksana", karakterOrang: "Intuitif, reflektif, diplomatis", siklusGeneratif: "Air → Kayu", siklusDestruktif: "Air → Api" }
+    ];
+
+    const days = ["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+    const pasaran = ["Legi","Pahing","Pon","Wage","Kliwon"];
+    const dayNeptu = { "Minggu":5, "Senin":4, "Selasa":3, "Rabu":7, "Kamis":8, "Jumat":6, "Sabtu":9 };
+    const pasaranNeptu = { "Legi":5, "Pahing":9, "Pon":7, "Wage":4, "Kliwon":8 };
+    const wetonWatak = {
+        "Minggu Legi": "Cerdas, rajin, bijaksana, disukai banyak orang.",
+        "Minggu Pahing": "Tekun, pekerja keras, pandai mengatur keuangan.",
+        "Minggu Pon": "Sabar, teliti, cermat, bakat seni tinggi.",
+        "Minggu Wage": "Ulet, tangguh, hemat, naluri bisnis tajam.",
+        "Minggu Kliwon": "Karismatik, berwibawa, spiritual.",
+        "Senin Legi": "Lembut, penyayang, romantis, jiwa seni.",
+        "Senin Pahing": "Tekad kuat, pantang menyerah, mandiri.",
+        "Senin Pon": "Tenang, bijaksana, pendengar baik.",
+        "Senin Wage": "Ceria, mudah bergaul, optimis.",
+        "Senin Kliwon": "Misterius, intuitif kuat, spiritual.",
+        "Selasa Legi": "Berani, tegas, bersemangat, petualang.",
+        "Selasa Pahing": "Ambisius, pekerja keras, visioner.",
+        "Selasa Pon": "Sabar, realistis, praktis.",
+        "Selasa Wage": "Cerdik, pandai berdiplomasi, humoris.",
+        "Selasa Kliwon": "Berwibawa, tegas adil, dihormati.",
+        "Rabu Legi": "Cerdas, komunikatif, pandai bergaul.",
+        "Rabu Pahing": "Tekun, teliti, analitis.",
+        "Rabu Pon": "Sabar, bijaksana, suka belajar.",
+        "Rabu Wage": "Lincah, ceria, kreatif.",
+        "Rabu Kliwon": "Intuitif, bijaksana, firasat kuat.",
+        "Kamis Legi": "Bijaksana, murah hati, dihormati.",
+        "Kamis Pahing": "Ambisius, determinasi tinggi.",
+        "Kamis Pon": "Tenang, stabil, dapat diandalkan.",
+        "Kamis Wage": "Komunikatif, ramah, memotivasi.",
+        "Kamis Kliwon": "Berkarisma tinggi, bijaksana.",
+        "Jumat Legi": "Lembut, penyayang, setia.",
+        "Jumat Pahing": "Tekun, realistis, pekerja keras.",
+        "Jumat Pon": "Sabar, suka menolong, empati tinggi.",
+        "Jumat Wage": "Ceria, optimis, mudah bergaul.",
+        "Jumat Kliwon": "Karismatik, misterius, spiritual.",
+        "Sabtu Legi": "Cerdas, mandiri, tekun.",
+        "Sabtu Pahing": "Ambisius, kuat, determinasi tinggi.",
+        "Sabtu Pon": "Sabar, praktis, teliti.",
+        "Sabtu Wage": "Kreatif, inovatif, humoris.",
+        "Sabtu Kliwon": "Berwibawa, bijaksana, spiritual."
+    };
+    const imlekDates = { 1924:[2,5],1925:[1,24],1926:[2,13],1927:[2,2],1928:[1,23],1929:[2,10],1930:[1,30],1931:[2,17],1932:[2,6],1933:[1,26],1934:[2,14],1935:[2,4],1936:[1,24],1937:[2,11],1938:[1,31],1939:[2,19],1940:[2,8],1941:[1,27],1942:[2,15],1943:[2,5],1944:[1,25],1945:[2,13],1946:[2,2],1947:[1,22],1948:[2,10],1949:[1,29],1950:[2,17],1951:[2,6],1952:[1,27],1953:[2,14],1954:[2,3],1955:[1,24],1956:[2,12],1957:[1,31],1958:[2,18],1959:[2,8],1960:[1,28],1961:[2,15],1962:[2,5],1963:[1,25],1964:[2,13],1965:[2,2],1966:[1,21],1967:[2,9],1968:[1,30],1969:[2,17],1970:[2,6],1971:[1,27],1972:[2,15],1973:[2,3],1974:[1,23],1975:[2,11],1976:[1,31],1977:[2,18],1978:[2,7],1979:[1,28],1980:[2,16],1981:[2,5],1982:[1,25],1983:[2,13],1984:[2,2],1985:[2,20],1986:[2,9],1987:[1,29],1988:[2,17],1989:[2,6],1990:[1,27],1991:[2,15],1992:[2,4],1993:[1,23],1994:[2,10],1995:[1,31],1996:[2,19],1997:[2,7],1998:[1,28],1999:[2,16],2000:[2,5],2001:[1,24],2002:[2,12],2003:[2,1],2004:[1,22],2005:[2,9],2006:[1,29],2007:[2,18],2008:[2,7],2009:[1,26],2010:[2,14],2011:[2,3],2012:[1,23],2013:[2,10],2014:[1,31],2015:[2,19],2016:[2,8],2017:[1,28],2018:[2,16],2019:[2,5],2020:[1,25],2021:[2,12],2022:[2,1],2023:[1,22],2024:[2,10],2025:[1,29],2026:[2,17],2027:[2,6],2028:[1,26],2029:[2,13],2030:[2,3],2031:[1,23],2032:[2,11],2033:[1,31],2034:[2,19],2035:[2,8],2036:[1,28],2037:[2,15],2038:[2,4],2039:[1,24],2040:[2,12],2041:[2,1],2042:[1,22],2043:[2,10] };
+    const SHIO_LIST = ["Tikus","Kerbau","Macan","Kelinci","Naga","Ular","Kuda","Kambing","Monyet","Ayam","Anjing","Babi"];
+    const ELEMEN_LIST = ["Kayu","Api","Tanah","Logam","Air"];
+
+    // ═══════════════════════════════════════════════════════════════
+    // 2. ENGINE KALKULATOR (dari calcukosmik3)
+    // ═══════════════════════════════════════════════════════════════
+
+    function getImlekYear(date) {
+        const y = date.getFullYear();
+        const imlek = imlekDates[y];
+        if (!imlek) return y;
+        const imlekDate = new Date(y, imlek[0]-1, imlek[1]);
+        return date < imlekDate ? y - 1 : y;
+    }
+    function getShioElemen(tgl) {
+        const shioYear = getImlekYear(tgl);
+        const shioIndex = (shioYear - 4) % 12;
+        const elemenIndex = Math.floor((shioYear - 4) % 10 / 2);
+        return { shio: SHIO_LIST[shioIndex], elemen: ELEMEN_LIST[elemenIndex] };
+    }
+    function getZodiak(day, month) {
+        const ranges = [
+            [1,1,1,19,"Capricorn"],[1,20,2,18,"Aquarius"],[2,19,3,20,"Pisces"],[3,21,4,19,"Aries"],
+            [4,20,5,20,"Taurus"],[5,21,6,20,"Gemini"],[6,21,7,22,"Cancer"],[7,23,8,22,"Leo"],
+            [8,23,9,22,"Virgo"],[9,23,10,22,"Libra"],[10,23,11,21,"Scorpio"],[11,22,12,21,"Sagittarius"],[12,22,12,31,"Capricorn"]
+        ];
+        for (let r of ranges) {
+            if ((month === r[0] && day >= r[1]) || (month === r[2] && day <= r[3]) || (month > r[0] && month < r[2]) || (r[0] > r[2] && (month > r[0] || month < r[2]))) {
+                return r[4];
+            }
+        }
+        return "Capricorn";
+    }
+    const PLANET_MAP = { "Aries":"Mars","Taurus":"Venus","Gemini":"Merkurius","Cancer":"Bulan","Leo":"Matahari","Virgo":"Merkurius","Libra":"Venus","Scorpio":"Pluto & Mars","Sagittarius":"Jupiter","Capricorn":"Saturnus","Aquarius":"Uranus & Saturnus","Pisces":"Neptunus & Jupiter" };
+    function getPlanet(z) { return PLANET_MAP[z] || "Tidak diketahui"; }
+    function getWeton(tgl) {
+        const dayOfWeek = tgl.getDay();
+        const hari = days[dayOfWeek];
+        const patokan = new Date(1900, 0, 1);
+        const diffDays = Math.round((tgl.getTime() - patokan.getTime()) / (1000*60*60*24));
+        const pasaranIndex = ((diffDays % 5) + 4) % 5;
+        const pasaranN = pasaran[pasaranIndex];
+        return { hari, pasaran: pasaranN, neptu: dayNeptu[hari] + pasaranNeptu[pasaranN] };
+    }
+
+    function getZodiakElement(z) {
+        if (["Aries","Leo","Sagittarius"].includes(z)) return "Api";
+        if (["Taurus","Virgo","Capricorn"].includes(z)) return "Tanah";
+        if (["Gemini","Libra","Aquarius"].includes(z)) return "Udara";
+        return "Air";
+    }
+    function getShioTrine(shio) {
+        const groups = [["Tikus","Naga","Monyet"],["Kerbau","Ular","Ayam"],["Macan","Kuda","Anjing"],["Kelinci","Kambing","Babi"]];
+        for (let g of groups) if (g.includes(shio)) return g;
+        return [];
+    }
+    function getElementInteraction(e1, e2) {
+        const creative = { Kayu:"Api", Api:"Tanah", Tanah:"Logam", Logam:"Air", Air:"Kayu" };
+        const destructive = { Kayu:"Tanah", Api:"Logam", Tanah:"Air", Logam:"Kayu", Air:"Api" };
+        if (e1 === e2) return 1;
+        if (creative[e1] === e2) return 2;
+        if (destructive[e1] === e2) return -2;
+        return 0;
+    }
+    function compatibilityScore(a, b) {
+        let score = 0;
+        const trineA = getShioTrine(a.shio);
+        if (trineA.includes(b.shio)) score += 3;
+        const oppose = { Tikus:"Kuda", Kerbau:"Kambing", Macan:"Monyet", Kelinci:"Ayam", Naga:"Anjing", Ular:"Babi", Kuda:"Tikus", Kambing:"Kerbau", Monyet:"Macan", Ayam:"Kelinci", Anjing:"Naga", Babi:"Ular" };
+        if (oppose[a.shio] === b.shio) score -= 2;
+        score += getElementInteraction(a.elemen, b.elemen);
+        const za = getZodiakElement(a.zodiak), zb = getZodiakElement(b.zodiak);
+        if (za === zb) score += 2;
+        else if ((za==="Api"&&zb==="Air")||(za==="Air"&&zb==="Api")||(za==="Tanah"&&zb==="Udara")||(za==="Udara"&&zb==="Tanah")) score -= 2;
+        score -= Math.abs(a.neptu - b.neptu) * 0.4;
+        return Math.round(score * 10) / 10;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 3. STATE & PROFIL MANAGEMENT
+    // ═══════════════════════════════════════════════════════════════
+
+    let profiles = [];
+    let chartInstance = null;
+    let wetonList = [];
+
+    function tambahProfil() {
+        const nama = document.getElementById('inputNama').value.trim() || `Profil ${profiles.length+1}`;
+        const tgl = parseInt(document.getElementById('inputTanggal').value);
+        const bln = parseInt(document.getElementById('inputBulan').value);
+        const thn = parseInt(document.getElementById('inputTahun').value);
+        const lat = parseFloat(document.getElementById('inputLat').value) || -6.2;
+        const lng = parseFloat(document.getElementById('inputLng').value) || 106.8;
+
+        if (isNaN(tgl)||isNaN(bln)||isNaN(thn)||tgl<1||tgl>31||bln<1||bln>12||thn<1900) {
+            alert('Masukkan tanggal lahir yang valid!');
+            return;
+        }
+        const date = new Date(thn, bln-1, tgl);
+        if (date.getDate() !== tgl || date.getMonth() !== bln-1) {
+            alert('Tanggal tidak valid!');
+            return;
+        }
+
+        const { shio, elemen } = getShioElemen(date);
+        const zodiak = getZodiak(tgl, bln);
+        const planet = getPlanet(zodiak);
+        const weton = getWeton(date);
+        const tglStr = `${tgl}/${bln}/${thn}`;
+
+        // SunCalc data
+        const sunTimes = SunCalc.getTimes(date, lat, lng);
+        const moonIllum = SunCalc.getMoonIllumination(date);
+
+        profiles.push({
+            nama, tglStr, date, lat, lng,
+            shio, elemen, zodiak, planet,
+            wetonHari: weton.hari, wetonPasaran: weton.pasaran, neptu: weton.neptu,
+            sunrise: sunTimes.sunrise ? sunTimes.sunrise.toLocaleTimeString() : '-',
+            sunset: sunTimes.sunset ? sunTimes.sunset.toLocaleTimeString() : '-',
+            moonPhase: (moonIllum.phase * 100).toFixed(1) + '%',
+        });
+        renderDaftarProfil();
+        document.getElementById('inputNama').value = '';
+        document.getElementById('inputTanggal').value = '';
+        document.getElementById('inputBulan').value = '';
+        document.getElementById('inputTahun').value = '';
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+    }
+
+    function hapusProfil(i) {
+        if (profiles.length <= 1) { alert('Minimal 1 profil untuk dibandingkan.'); return; }
+        profiles.splice(i,1);
+        renderDaftarProfil();
+        document.getElementById('hasilPerbandingan').classList.add('hidden');
+    }
+
+    function hapusSemua() {
+        if (!confirm('Hapus semua profil?')) return;
+        profiles = [];
+        renderDaftarProfil();
+        document.getElementById('hasilPerbandingan').classList.add('hidden');
+    }
+
+    function renderDaftarProfil() {
+        const div = document.getElementById('daftarProfil');
+        document.getElementById('jumlahProfil').textContent = profiles.length + ' profil';
+        if (profiles.length === 0) {
+            div.innerHTML = '<p class="text-gray-500 text-center py-8">✨ Belum ada profil.</p>';
+            return;
+        }
+        let html = `<table class="w-full text-sm"><thead><tr class="border-b border-white/10"><th class="text-left p-2">No</th><th class="text-left p-2">Nama</th><th class="text-left p-2">Tgl Lahir</th><th class="text-left p-2">Shio</th><th class="text-left p-2">Zodiak</th><th class="text-left p-2">Weton</th><th class="text-left p-2">Aksi</th></tr></thead><tbody>`;
+        profiles.forEach((p,i) => {
+            html += `<tr class="border-b border-white/5"><td class="p-2">${i+1}</td><td class="p-2">${p.nama}</td><td class="p-2">${p.tglStr}</td><td class="p-2">🐾 ${p.shio}</td><td class="p-2">♈ ${p.zodiak}</td><td class="p-2">${p.wetonHari} ${p.wetonPasaran} (${p.neptu})</td><td class="p-2"><button onclick="hapusProfil(${i})" class="text-red-400 hover:text-red-300"><i class="fas fa-times"></i></button></td></tr>`;
+        });
+        html += '</tbody></table>';
+        div.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 4. BANDINGKAN + CHART + EKSPOR
+    // ═══════════════════════════════════════════════════════════════
+
+    function bandingkan() {
+        if (profiles.length < 2) { alert('Butuh minimal 2 profil untuk dibandingkan!'); return; }
+
+        const relasi = profiles.map((_,i) => {
+            let best = null, worst = null, bestS = -Infinity, worstS = Infinity;
+            for (let j=0; j<profiles.length; j++) {
+                if (i===j) continue;
+                const s = compatibilityScore(profiles[i], profiles[j]);
+                if (s > bestS) { bestS = s; best = { idx: j, score: s }; }
+                if (s < worstS) { worstS = s; worst = { idx: j, score: s }; }
+            }
+            return { best, worst };
+        });
+
+        // Build Table
+        let html = `<table class="comparison-table w-full text-xs md:text-sm"><thead><tr><th class="aspect-label">Aspek</th>`;
+        profiles.forEach(p => html += `<th class="bg-cosmic-700/50 p-2">${p.nama}<br><span class="font-normal text-gray-400">${p.tglStr}</span></th>`);
+        html += '</tr></thead><tbody>';
+
+        const rows = [
+            { label: '🔢 Esensi Neptu', key: (p) => `${p.wetonHari} ${p.wetonPasaran} (Neptu ${p.neptu})` },
+            { label: '🎭 Peran Utama', key: (p) => `${p.shio} ${p.zodiak} (${p.planet})` },
+            { label: '💞 Kecocokan Tertinggi', key: (p,i) => { const b=relasi[i].best; return b ? `Paling klop dengan <strong>${profiles[b.idx].nama}</strong> (skor ${b.score})` : '-'; } },
+            { label: '⚡ Potensi Gesekan', key: (p,i) => { const w=relasi[i].worst; return w ? `Potensi konflik dengan <strong>${profiles[w.idx].nama}</strong> (skor ${w.score})` : '-'; } },
+            { label: '🌊 Sifat Alami', key: (p) => `${p.shio} ${p.elemen} — ${p.zodiak}` },
+            { label: '🔄 Dinamika', key: (p) => `Weton ${p.wetonHari} ${p.wetonPasaran}` },
+            { label: '💼 Bidang Cocok', key: (p) => { const m = { Anjing:"Manajemen", Macan:"Kepemimpinan", Kelinci:"HR/Kreatif", Naga:"Direktur", Tikus:"Analis", Kambing:"Seni" }; return m[p.shio] || 'Serba bisa'; } },
+            { label: '🌅 Terbit/Tenggelam', key: (p) => `☀️ ${p.sunrise} / ${p.sunset}` },
+            { label: '🌙 Fase Bulan', key: (p) => `Illuminasi: ${p.moonPhase}` },
+            { label: '✅ Kelebihan', key: (p) => `Loyal, stabil, perspektif mendalam.` },
+            { label: '⚠️ Kelemahan', key: (p) => `Keras kepala, suka memendam masalah.` },
+            { label: '🛠️ Solusi', key: (p) => `Belajar fleksibel & terbuka.` }
+        ];
+
+        rows.forEach(row => {
+            html += `<tr><td class="aspect-label">${row.label}</td>`;
+            profiles.forEach((p,i) => {
+                const val = typeof row.key === 'function' ? row.key(p,i) : row.key(p);
+                html += `<td>${val}</td>`;
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table>';
+        document.getElementById('hasilContainer').innerHTML = html;
+        document.getElementById('hasilPerbandingan').classList.remove('hidden');
+
+        // ═══ RADAR CHART ═══
+        renderRadarChart();
+
+        // ═══ CONFETTI ═══
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.5 } });
+        setTimeout(() => confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } }), 200);
+    }
+
+    function renderRadarChart() {
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        const labels = ['Shio Harmony', 'Element Synergy', 'Zodiac Match', 'Neptu Balance', 'Overall Vibe'];
+        const colors = ['#f59e0b', '#ef4444', '#8b5cf6', '#22c55e', '#06b6d4'];
+
+        const datasets = profiles.map((p, i) => {
+            const vals = [];
+            for (let j=0; j<profiles.length; j++) {
+                if (i===j) continue;
+                const s = compatibilityScore(p, profiles[j]);
+                vals.push(s);
+            }
+            const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+            // Skala ke 0-100 untuk tampilan bagus
+            const base = Math.max(0, Math.min(10, avg));
+            return {
+                label: p.nama,
+                data: [
+                    (base * 10) + 10,
+                    (base * 8) + 20,
+                    (base * 9) + 15,
+                    (base * 7) + 25,
+                    (base * 10) + 20
+                ],
+                borderColor: colors[i % colors.length],
+                backgroundColor: colors[i % colors.length] + '40',
+                pointBackgroundColor: colors[i % colors.length],
+                fill: true,
+                tension: 0.3
+            };
+        });
+
+        chartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: { labels, datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#e2e8f0', font: { size: 12 } } }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: '#4b3f72' },
+                        grid: { color: '#4b3f72' },
+                        pointLabels: { color: '#e2e8f0', font: { size: 11 } },
+                        ticks: { display: false, stepSize: 20 },
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }
+            }
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 5. EKSPOR: SCREENSHOT & EXCEL
+    // ═══════════════════════════════════════════════════════════════
+
+    function screenshotHasil() {
+        const el = document.getElementById('hasilPerbandingan');
+        if (el.classList.contains('hidden')) { alert('Bandingkan dulu!'); return; }
+        html2canvas(el, { backgroundColor: '#0a0a1a', scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'analisis-kosmik.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => alert('Gagal screenshot: '+err));
+    }
+
+    function exportExcel() {
+        if (profiles.length < 2) { alert('Bandingkan dulu!'); return; }
+        const rows = [['Nama','Tanggal','Shio','Elemen','Zodiak','Planet','Weton','Neptu']];
+        profiles.forEach(p => {
+            rows.push([p.nama, p.tglStr, p.shio, p.elemen, p.zodiak, p.planet, `${p.wetonHari} ${p.wetonPasaran}`, p.neptu]);
+        });
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        XLSX.utils.book_append_sheet(wb, ws, 'Profil Kosmik');
+        XLSX.writeFile(wb, 'kosmik-profil.xlsx');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 6. SAVE / LOAD
+    // ═══════════════════════════════════════════════════════════════
+
+    function simpanProject() {
+        try {
+            localStorage.setItem('kosmik_pro_max', JSON.stringify(profiles));
+            alert('Project tersimpan!');
+        } catch(e) { alert('Gagal save: '+e.message); }
+    }
+    function loadProject() {
+        try {
+            const raw = localStorage.getItem('kosmik_pro_max');
+            if (!raw) { alert('Tidak ada project tersimpan.'); return; }
+            profiles = JSON.parse(raw);
+            renderDaftarProfil();
+            document.getElementById('hasilPerbandingan').classList.add('hidden');
+            alert('Project dimuat! '+profiles.length+' profil.');
+        } catch(e) { alert('Gagal load: '+e.message); }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 7. RENDER ENSIKLOPEDIA (Shio, Zodiak, Planet, Elemen, Weton)
+    // ═══════════════════════════════════════════════════════════════
+
+    function renderShio() {
+        const grid = document.getElementById('shio-grid');
+        grid.innerHTML = shioData.map((s,i) => `
+            <div class="detail-card card-gradient-shio glass rounded-2xl p-6 border" onclick="showModal('shio',${i})">
+                <div class="text-5xl animate-float">${s.emoji}</div>
+                <h3 class="text-xl font-bold text-white mt-2">${s.nama}</h3>
+                <div class="flex gap-2 mt-2"><span class="text-xs bg-red-500/20 px-2 py-1 rounded">${s.elemen}</span></div>
+                <p class="text-sm text-gray-400 mt-2"><strong>Sifat:</strong> ${s.sifatPositif}</p>
+            </div>`).join('');
+    }
+
+    function renderZodiak() {
+        const grid = document.getElementById('zodiak-grid');
+        grid.innerHTML = zodiakData.map((z,i) => `
+            <div class="detail-card card-gradient-zodiak glass rounded-2xl p-6 border" onclick="showModal('zodiak',${i})">
+                <div class="text-6xl text-purple-300">${z.simbol}</div>
+                <h3 class="text-xl font-bold text-white mt-2">${z.nama}</h3>
+                <p class="text-sm text-purple-300">${z.tanggal}</p>
+                <div class="flex gap-2 mt-2"><span class="text-xs bg-purple-500/20 px-2 py-1 rounded">${z.elemen}</span></div>
+            </div>`).join('');
+    }
+
+    function renderPlanet() {
+        const grid = document.getElementById('planet-grid');
+        grid.innerHTML = planetData.map((p,i) => `
+            <div class="detail-card card-gradient-planet glass rounded-2xl p-6 border" onclick="showModal('planet',${i})">
+                <div class="text-5xl">${p.emoji}</div>
+                <h3 class="text-xl font-bold text-white mt-2">${p.nama}</h3>
+                <p class="text-sm text-blue-300">${p.tipe}</p>
+                <p class="text-xs text-gray-400 mt-1"><strong>Diameter:</strong> ${p.diameter}</p>
+            </div>`).join('');
+    }
+
+    function renderElemen() {
+        const grid = document.getElementById('elemen-grid');
+        grid.innerHTML = elemenData.map((e,i) => `
+            <div class="detail-card card-gradient-elemen glass rounded-2xl p-6 border" onclick="showModal('elemen',${i})">
+                <div class="text-5xl animate-pulse-slow">${e.emoji}</div>
+                <h3 class="text-xl font-bold text-white mt-2">${e.nama}</h3>
+                <div class="flex gap-2 mt-1"><span class="text-xs bg-green-500/20 px-2 py-1 rounded">${e.warna}</span></div>
+                <p class="text-sm text-gray-400 mt-2">${e.sifat}</p>
+            </div>`).join('');
+    }
+
+    function renderWeton() {
+        const grid = document.getElementById('weton-grid');
+        wetonList = [];
+        let html = '';
+        days.forEach(day => {
+            pasaran.forEach(pasar => {
+                const key = `${day} ${pasar}`;
+                const total = dayNeptu[day] + pasaranNeptu[pasar];
+                const watak = wetonWatak[key] || 'Watak baik.';
+                wetonList.push({ key, pasar, totalNeptu: total, watak });
+                const idx = wetonList.length - 1;
+                html += `
+                    <div class="detail-card card-gradient-weton glass rounded-xl p-4 border" onclick="showModal('weton',${idx})">
+                        <div class="text-lg font-bold text-gold-400">${key}</div>
+                        <div class="text-center py-2 bg-gold-500/10 rounded-lg border border-gold-500/30 mt-2">
+                            <div class="text-xs text-gray-400">Neptu</div>
+                            <div class="text-2xl font-black text-gold-400">${total}</div>
+                        </div>
+                    </div>`;
+            });
+        });
+        grid.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 8. MODAL
+    // ═══════════════════════════════════════════════════════════════
+
+    function showModal(type, idx) {
+        const modal = document.getElementById('modal');
+        const title = document.getElementById('modal-title');
+        const body = document.getElementById('modal-body');
+        let html = '';
+
+        if (type === 'shio') {
+            const s = shioData[idx];
+            title.innerHTML = `${s.emoji} ${s.nama}`;
+            html = `
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="glass p-2 rounded"><strong>Elemen:</strong> ${s.elemen}</div>
+                    <div class="glass p-2 rounded"><strong>Arah:</strong> ${s.arah}</div>
+                    <div class="glass p-2 rounded"><strong>Waktu:</strong> ${s.waktu}</div>
+                    <div class="glass p-2 rounded"><strong>Cocok:</strong> ${s.cocok}</div>
+                </div>
+                <div><strong>Tahun:</strong> ${s.tahun.slice(0,6).join(', ')}...</div>
+                <div><strong>Positif:</strong> ${s.sifatPositif}</div>
+                <div><strong>Negatif:</strong> ${s.sifatNegatif}</div>
+                <div><strong>Keberuntungan:</strong> ${s.keberuntungan}</div>
+            `;
+        } else if (type === 'zodiak') {
+            const z = zodiakData[idx];
+            title.innerHTML = `${z.simbol} ${z.nama}`;
+            html = `
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="glass p-2 rounded"><strong>Tanggal:</strong> ${z.tanggal}</div>
+                    <div class="glass p-2 rounded"><strong>Elemen:</strong> ${z.elemen}</div>
+                    <div class="glass p-2 rounded"><strong>Planet:</strong> ${z.planet}</div>
+                    <div class="glass p-2 rounded"><strong>Cocok:</strong> ${z.kompatibilitas}</div>
+                </div>
+                <div><strong>Positif:</strong> ${z.sifatPositif}</div>
+                <div><strong>Negatif:</strong> ${z.sifatNegatif}</div>
+                <div><strong>Pekerjaan:</strong> ${z.pekerjaan}</div>
+            `;
+        } else if (type === 'planet') {
+            const p = planetData[idx];
+            title.innerHTML = `${p.emoji} ${p.nama}`;
+            html = `
+                <div class="glass p-2 rounded mb-2"><strong>Tipe:</strong> ${p.tipe}</div>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><strong>Jarak:</strong> ${p.jarakMatahari}</div>
+                    <div><strong>Diameter:</strong> ${p.diameter}</div>
+                    <div><strong>Orbit:</strong> ${p.orbit}</div>
+                    <div><strong>Rotasi:</strong> ${p.rotasi}</div>
+                    <div><strong>Suhu:</strong> ${p.suhu}</div>
+                    <div><strong>Satelit:</strong> ${p.satelit}</div>
+                </div>
+                <div class="mt-2 bg-blue-500/10 p-3 rounded border border-blue-500/30">💡 ${p.fakta}</div>
+            `;
+        } else if (type === 'elemen') {
+            const e = elemenData[idx];
+            title.innerHTML = `${e.emoji} ${e.nama}`;
+            html = `
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div class="glass p-2 rounded"><strong>Warna:</strong> ${e.warna}</div>
+                    <div class="glass p-2 rounded"><strong>Musim:</strong> ${e.musim}</div>
+                    <div class="glass p-2 rounded"><strong>Arah:</strong> ${e.arah}</div>
+                    <div class="glass p-2 rounded"><strong>Planet:</strong> ${e.planet}</div>
+                </div>
+                <div><strong>Sifat:</strong> ${e.sifat}</div>
+                <div><strong>Karakter:</strong> ${e.karakterOrang}</div>
+                <div class="bg-green-500/10 p-2 rounded border border-green-500/30"><strong>Melahirkan:</strong> ${e.siklusGeneratif}</div>
+                <div class="bg-red-500/10 p-2 rounded border border-red-500/30"><strong>Mengalahkan:</strong> ${e.siklusDestruktif}</div>
+            `;
+        } else if (type === 'weton') {
+            const w = wetonList[idx];
+            title.innerHTML = `📅 ${w.key}`;
+            html = `
+                <div class="glass p-6 rounded-xl bg-gold-500/10 border border-gold-500/30 text-center mb-4">
+                    <div class="text-5xl font-black text-gold-400">${w.totalNeptu}</div>
+                    <div class="text-xs text-gray-400">Neptu Total</div>
+                </div>
+                <div class="glass p-4 rounded-lg"><strong>Watak:</strong> ${w.watak}</div>
+                <div class="text-xs text-gray-400 mt-2 bg-black/30 p-3 rounded">Neptu = nilai angka dalam kalender Jawa.</div>
+            `;
+        }
+
+        body.innerHTML = html;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeModal(e) {
+        if (!e || e.target === document.getElementById('modal')) {
+            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').classList.remove('flex');
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 9. TAB SWITCHING
+    // ═══════════════════════════════════════════════════════════════
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('animate-fade-in');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('tab-active'));
+
+        const contentEl = document.getElementById('content-' + tabName);
+        const tabEl = document.getElementById('tab-' + tabName);
+        if (contentEl) {
+            contentEl.classList.remove('hidden');
+            setTimeout(() => contentEl.classList.add('animate-fade-in'), 10);
+        }
+        if (tabEl) tabEl.classList.add('tab-active');
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 10. INIT
+    // ═══════════════════════════════════════════════════════════════
+
+    renderShio();
+    renderZodiak();
+    renderPlanet();
+    renderElemen();
+    renderWeton();
+    renderDaftarProfil();
+    console.log('🌌 Kosmik Pro Max siap!');
+</script>
+</body>
+</html>
