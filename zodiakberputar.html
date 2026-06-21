@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔮 Kalkulator Zodiak Lengkap</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/poppins@5.0.8/index.css">
+<style>
+  * { font-family: 'Poppins', sans-serif; }
+  body {
+    background: radial-gradient(ellipse at top, #1e1b4b 0%, #0f0a1e 50%, #000 100%);
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(2px 2px at 20% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 60% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 50% 20%, #fff, transparent),
+      radial-gradient(2px 2px at 80% 10%, #fff, transparent),
+      radial-gradient(1px 1px at 90% 60%, #fff, transparent),
+      radial-gradient(1px 1px at 33% 80%, #fff, transparent),
+      radial-gradient(2px 2px at 15% 50%, #fff, transparent);
+    background-size: 200% 200%;
+    animation: twinkle 8s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:.6} 50%{opacity:1} }
+  .glass {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .glow-btn {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    box-shadow: 0 0 30px rgba(139,92,246,0.5);
+    transition: all .3s;
+  }
+  .glow-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 50px rgba(236,72,153,0.7);
+  }
+  .zodiac-card {
+    transition: all .4s cubic-bezier(.4,0,.2,1);
+  }
+  .zodiac-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(236,72,153,0.5);
+  }
+  .fade-in { animation: fadeIn .8s ease-out; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .spin-slow { animation: spin 60s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+  @keyframes pulseGlow { 0%,100%{filter:drop-shadow(0 0 10px #8b5cf6)} 50%{filter:drop-shadow(0 0 25px #ec4899)} }
+  .compat-bar {
+    background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b);
+    transition: width 1s ease-out;
+  }
+  .tab-active {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: white;
+  }
+  .scroll-hide::-webkit-scrollbar { display: none; }
+  .zodiac-wheel {
+    position: relative;
+    width: 320px; height: 320px;
+    margin: 0 auto;
+  }
+  .wheel-sign {
+    position: absolute;
+    width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    border-radius: 50%;
+    background: rgba(139,92,246,0.15);
+    border: 2px solid rgba(139,92,246,0.4);
+    transition: all .3s;
+    cursor: pointer;
+  }
+  .wheel-sign.active {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    transform: scale(1.3);
+    box-shadow: 0 0 30px rgba(236,72,153,0.8);
+    border-color: #fff;
+  }
+  .trait-chip {
+    background: linear-gradient(135deg, rgba(139,92,246,0.3), rgba(236,72,153,0.3));
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<div class="relative z-10 max-w-6xl mx-auto px-4 py-10">
+
+  <!-- Header -->
+  <header class="text-center mb-10 fade-in">
+    <div class="text-6xl mb-3 pulse-glow">🔮</div>
+    <h1 class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
+      Kalkulator Zodiak Lengkap
+    </h1>
+    <p class="text-gray-400 mt-2">Zodiak Barat • Zodiak China • Elemen • Kompatibilitas • Dan Banyak Lagi</p>
+  </header>
+
+  <!-- Input Section -->
+  <section class="glass rounded-3xl p-6 md:p-8 mb-8 fade-in">
+    <h2 class="text-xl font-semibold mb-4 text-purple-300">✨ Pilih Tanggal Lahir Kamu</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <label class="text-sm text-gray-400">Tanggal</label>
+        <input id="day" type="number" min="1" max="31" placeholder="15" class="w-full mt-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-400">
+      </div>
+      <div>
+        <label class="text-sm text-gray-400">Bulan</label>
+        <select id="month" class="w-full mt-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-400">
+          <option value="">-- Pilih Bulan --</option>
+          <option value="1">Januari</option><option value="2">Februari</option>
+          <option value="3">Maret</option><option value="4">April</option>
+          <option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option>
+          <option value="9">September</option><option value="10">Oktober</option>
+          <option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-sm text-gray-400">Tahun</label>
+        <input id="year" type="number" min="1900" max="2100" placeholder="2000" class="w-full mt-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-pink-400">
+      </div>
+      <div class="flex items-end">
+        <button onclick="calculate()" class="glow-btn w-full py-3 rounded-xl font-semibold text-white">
+          🔮 Cek Zodiak Saya
+        </button>
+      </div>
+    </div>
+    <p id="error" class="text-red-400 text-sm mt-3 hidden"></p>
+  </section>
+
+  <!-- Results -->
+  <div id="results" class="hidden">
+
+    <!-- Main Info Card -->
+    <section class="glass rounded-3xl p-6 md:p-8 mb-8 fade-in">
+      <div class="grid md:grid-cols-3 gap-6 items-center">
+        <div class="text-center">
+          <div id="mainSymbol" class="text-8xl mb-2 pulse-glow"></div>
+          <h2 id="mainName" class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"></h2>
+          <p id="mainDate" class="text-gray-400 text-sm mt-1"></p>
+        </div>
+        <div class="md:col-span-2">
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">🪐 Planet Penguasa</div>
+              <div id="infoPlanet" class="font-semibold mt-1"></div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">🌊 Elemen</div>
+              <div id="infoElement" class="font-semibold mt-1"></div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">💎 Batu Kelahiran</div>
+              <div id="infoStone" class="font-semibold mt-1"></div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">🎨 Warna Keberuntungan</div>
+              <div id="infoColor" class="font-semibold mt-1"></div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">🔢 Angka Hoki</div>
+              <div id="infoNumbers" class="font-semibold mt-1"></div>
+            </div>
+            <div class="bg-black/30 rounded-xl p-3">
+              <div class="text-xs text-gray-400">📅 Hari Baik</div>
+              <div id="infoDay" class="font-semibold mt-1"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-6 overflow-x-auto scroll-hide">
+      <button onclick="switchTab('wheel')" class="tab-btn tab-active px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-tab="wheel">🎡 Roda Zodiak</button>
+      <button onclick="switchTab('traits')" class="tab-btn bg-black/40 px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-tab="traits">💫 Kepribadian</button>
+      <button onclick="switchTab('chinese')" class="tab-btn bg-black/40 px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-tab="chinese">🐉 Zodiak China</button>
+      <button onclick="switchTab('compat')" class="tab-btn bg-black/40 px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-tab="compat">💕 Kompatibilitas</button>
+      <button onclick="switchTab('all')" class="tab-btn bg-black/40 px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-tab="all">📋 Semua Zodiak</button>
+    </div>
+
+    <!-- Tab: Zodiac Wheel -->
+    <section id="tab-wheel" class="tab-content glass rounded-3xl p-6 md:p-8 mb-8 fade-in">
+      <h3 class="text-xl font-semibold mb-6 text-center text-purple-300">🎡 Roda Zodiak</h3>
+      <div class="zodiac-wheel spin-slow" id="zodiacWheel"></div>
+      <p class="text-center text-gray-400 text-sm mt-6">Klik simbol zodiak untuk melihat detail</p>
+    </section>
+
+    <!-- Tab: Traits -->
+    <section id="tab-traits" class="tab-content glass rounded-3xl p-6 md:p-8 mb-8 hidden fade-in">
+      <h3 class="text-xl font-semibold mb-4 text-purple-300">💫 Kepribadian & Karakter</h3>
+      <p id="traitDesc" class="text-gray-300 leading-relaxed mb-5"></p>
+      <div class="grid md:grid-cols-2 gap-4 mb-5">
+        <div class="bg-black/30 rounded-xl p-4">
+          <div class="text-green-400 font-semibold mb-2">✅ Kekuatan</div>
+          <div id="traitStrengths" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div class="bg-black/30 rounded-xl p-4">
+          <div class="text-red-400 font-semibold mb-2">⚠️ Kelemahan</div>
+          <div id="traitWeaknesses" class="flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="bg-black/30 rounded-xl p-4">
+          <div class="text-xs text-gray-400">💼 Karir Cocok</div>
+          <div id="traitCareer" class="font-semibold mt-2 text-sm"></div>
+        </div>
+        <div class="bg-black/30 rounded-xl p-4">
+          <div class="text-xs text-gray-400">❤️ Cinta & Hubungan</div>
+          <div id="traitLove" class="font-semibold mt-2 text-sm"></div>
+        </div>
+        <div class="bg-black/30 rounded-xl p-4">
+          <div class="text-xs text-gray-400">💰 Keuangan</div>
+          <div id="traitFinance" class="font-semibold mt-2 text-sm"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab: Chinese -->
+    <section id="tab-chinese" class="tab-content glass rounded-3xl p-6 md:p-8 mb-8 hidden fade-in">
+      <h3 class="text-xl font-semibold mb-6 text-purple-300">🐉 Zodiak China & Elemen</h3>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="text-center bg-black/30 rounded-2xl p-6">
+          <div id="chineseSymbol" class="text-8xl mb-3"></div>
+          <h4 id="chineseName" class="text-2xl font-bold text-pink-400"></h4>
+          <p id="chineseElement" class="text-gray-400 mt-2"></p>
+          <p id="chineseYinYang" class="text-gray-400 text-sm"></p>
+        </div>
+        <div class="space-y-3">
+          <div class="bg-black/30 rounded-xl p-4">
+            <div class="text-xs text-gray-400">🎯 Karakter Utama</div>
+            <p id="chineseTraits" class="mt-2 text-sm"></p>
+          </div>
+          <div class="bg-black/30 rounded-xl p-4">
+            <div class="text-xs text-gray-400">🔢 Angka Keberuntungan</div>
+            <p id="chineseNumbers" class="mt-2 font-semibold"></p>
+          </div>
+          <div class="bg-black/30 rounded-xl p-4">
+            <div class="text-xs text-gray-400">🌸 Warna Hoki</div>
+            <p id="chineseColors" class="mt-2 font-semibold"></p>
+          </div>
+          <div class="bg-black/30 rounded-xl p-4">
+            <div class="text-xs text-gray-400">💕 Pasangan Terbaik</div>
+            <p id="chineseBestMatch" class="mt-2 font-semibold"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab: Compatibility -->
+    <section id="tab-compat" class="tab-content glass rounded-3xl p-6 md:p-8 mb-8 hidden fade-in">
+      <h3 class="text-xl font-semibold mb-6 text-purple-300">💕 Kompatibilitas Cinta</h3>
+      <div id="compatList" class="space-y-3"></div>
+    </section>
+
+    <!-- Tab: All Zodiacs -->
+    <section id="tab-all" class="tab-content glass rounded-3xl p-6 md:p-8 mb-8 hidden fade-in">
+      <h3 class="text-xl font-semibold mb-6 text-purple-300">📋 12 Zodiak Lengkap</h3>
+      <div id="allZodiacs" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+    </section>
+
+  </div>
+
+  <footer class="text-center text-gray-500 text-sm mt-10 pb-6">
+    <p>✨ Dibuat dengan cinta untuk para pecinta astrologi ✨</p>
+  </footer>
+</div>
+
+<script>
+const ZODIACS = [
+  { name:"Aries", symbol:"♈", emoji:"🐏", dates:"21 Mar - 19 Apr", element:"Api 🔥", planet:"Mars ♂", stone:"Berlian 💎", color:"Merah", numbers:"1, 8, 17", day:"Selasa",
+    desc:"Aries adalah pejuang alami yang penuh semangat, berani, dan penuh energi. Mereka adalah pionir yang tidak takut mengambil risiko dan selalu menjadi yang pertama dalam segala hal.",
+    strengths:["Berani","Percaya Diri","Energik","Optimis","Jujur","Antusias"],
+    weaknesses:["Impulsif","Tidak Sabar","Agresif","Egois","Pendek Temperamen"],
+    career:"Pemimpin, Atlet, Pengusaha, Militer, Sales", love:"Penuh gairah, dominan, butuh pasangan yang mandiri", finance:"Spontan dalam belanja, suka investasi berisiko" },
+  { name:"Taurus", symbol:"♉", emoji:"🐂", dates:"20 Apr - 20 Mei", element:"Tanah 🌍", planet:"Venus ♀", stone:"Zamrud 💚", color:"Hijau", numbers:"2, 6, 9, 12", day:"Jumat",
+    desc:"Taurus adalah sosok yang stabil, sabar, dan sangat setia. Mereka menghargai kenyamanan, keindahan, dan hal-hal material dalam hidup. Pekerja keras yang pantang menyerah.",
+    strengths:["Sabar","Setia","Praktis","Pekerja Keras","Dapat Diandalkan","Seni Tinggi"],
+    weaknesses:["Keras Kepala","Posesif","Materialistis","Pemalas","Resisten Perubahan"],
+    career:"Akuntan, Chef, Desainer, Bankir, Arsitek", love:"Romantis, setia, butuh kepastian dan kenyamanan", finance:"Sangat hemat, investasi jangka panjang, suka kemewahan" },
+  { name:"Gemini", symbol:"♊", emoji:"👯", dates:"21 Mei - 20 Jun", element:"Udara 💨", planet:"Merkurius ☿", stone:"Agate 🔵", color:"Kuning", numbers:"5, 7, 14, 23", day:"Rabu",
+    desc:"Gemini adalah komunikator ulung yang cerdas, adaptif, dan penuh rasa ingin tahu. Mereka punya dua sisi kepribadian yang membuatnya menarik dan sulit ditebak.",
+    strengths:["Cerdas","Adaptif","Komunikatif","Ceria","Serbaguna","Penasaran"],
+    weaknesses:["Tidak Konsisten","Superfisial","Gelisah","Dua Muka","Suka Gosip"],
+    career:"Jurnalis, Penulis, Marketing, Guru, MC", love:"Butuh stimulasi intelektual, flirty, mudah bosan", finance:"Cepat dapat uang, cepat habis, suka variasi" },
+  { name:"Cancer", symbol:"♋", emoji:"🦀", dates:"21 Jun - 22 Jul", element:"Air 💧", planet:"Bulan ☾", stone:"Mutiara 🤍", color:"Perak", numbers:"2, 3, 15, 20", day:"Senin",
+    desc:"Cancer adalah zodiak paling emosional dan intuitif. Mereka sangat penyayang, protektif terhadap keluarga, dan memiliki memori yang kuat. Rumah adalah segalanya bagi mereka.",
+    strengths:["Penyayang","Setia","Intuitif","Protektif","Empatik","Sabar"],
+    weaknesses:["Moody","Sensitif Berlebih","Pendendam","Pesimis","Overthinking"],
+    career:"Perawat, Psikolog, Chef, Guru TK, Interior Designer", love:"Sangat romantis, keibuan/kebapakan, butuh keamanan emosional", finance:"Hemat, suka menabung untuk keluarga, investasi properti" },
+  { name:"Leo", symbol:"♌", emoji:"🦁", dates:"23 Jul - 22 Agu", element:"Api 🔥", planet:"Matahari ☀", stone:"Ruby ❤️", color:"Emas", numbers:"1, 3, 10, 19", day:"Minggu",
+    desc:"Leo adalah raja/zodiak yang karismatik, kreatif, dan suka menjadi pusat perhatian. Mereka murah hati, loyal, dan memiliki aura kepemimpinan yang alami.",
+    strengths:["Karismatik","Murah Hati","Kreatif","Setia","Percaya Diri","Pemimpin"],
+    weaknesses:["Sombong","Dramatis","Haus Perhatian","Keras Kepala","Mendominasi"],
+    career:"Artis, Entertainer, Politisi, CEO, Public Speaker", love:"Romantis, dramatis, butuh dipuja dan dihargai", finance:"Boros untuk kemewahan, dermawan, suka pamer" },
+  { name:"Virgo", symbol:"♍", emoji:"👼", dates:"23 Agu - 22 Sep", element:"Tanah 🌍", planet:"Merkurius ☿", stone:"Safir 💙", color:"Navy", numbers:"5, 14, 23, 32", day:"Rabu",
+    desc:"Virgo adalah perfeksionis yang analitis, teliti, dan sangat peduli pada detail. Mereka pekerja keras yang selalu ingin membantu orang lain dan membuat segalanya lebih baik.",
+    strengths:["Analitis","Teliti","Pekerja Keras","Setia","Praktis","Baik Hati"],
+    weaknesses:["Terlalu Kritis","Perfeksionis","Pemalu","Cemas","Overthinking"],
+    career:"Dokter, Editor, Akuntan, Peneliti, Analis Data", love:"Setia, perhatian dalam detail, butuh pasangan yang rapi", finance:"Sangat hemat, perencana keuangan hebat, investor hati-hati" },
+  { name:"Libra", symbol:"♎", emoji:"⚖️", dates:"23 Sep - 22 Okt", element:"Udara 💨", planet:"Venus ♀", stone:"Opal 🌈", color:"Pink", numbers:"4, 6, 13, 24", day:"Jumat",
+    desc:"Libra adalah diplomat alami yang cinta keadilan, keindahan, dan harmoni. Mereka sosial, romantis, dan selalu berusaha menciptakan keseimbangan dalam hidup.",
+    strengths:["Diplomatis","Adil","Sosial","Romantis","Idealistis","Koopertif"],
+    weaknesses:["Plin-plan","Menghindari Konflik","Pendendam","Tidak Realistis","Mudah Terpengaruh"],
+    career:"Diplomat, Lawyer, Designer, HR, Konsultan", love:"Sangat romantis, butuh partnership, benci sendirian", finance:"Boros untuk estetika, suka shopping, butuh financial advisor" },
+  { name:"Scorpio", symbol:"♏", emoji:"🦂", dates:"23 Okt - 21 Nov", element:"Air 💧", planet:"Pluto ♇", stone:"Topaz 🧡", color:"Merah Marun", numbers:"8, 11, 18, 22", day:"Selasa",
+    desc:"Scorpio adalah zodiak paling intens, misterius, dan penuh gairah. Mereka memiliki intuisi tajam, loyalitas luar biasa, dan kemampuan bangkit dari keterpurukan.",
+    strengths:["Intens","Loyal","Intuitif","Berani","Strategis","Passionate"],
+    weaknesses:["Cemburuan","Pendendam","Manipulatif","Rahasia","Obsesif"],
+    career:"Detektif, Psikolog, Surgeon, Researcher, Investigator", love:"Intens, posesif, sangat setia, butuh kedalaman emosi", finance:"Strategis dalam investasi, hemat, suka rahasia keuangan" },
+  { name:"Sagittarius", symbol:"♐", emoji:"🏹", dates:"22 Nov - 21 Des", element:"Api 🔥", planet:"Jupiter ♃", stone:"Turquoise 💠", color:"Ungu", numbers:"3, 7, 9, 12", day:"Kamis",
+    desc:"Sagittarius adalah petualang sejati yang optimis, bebas, dan penuh filsafat hidup. Mereka selalu mencari kebenaran, petualangan baru, dan pengalaman yang memperkaya jiwa.",
+    strengths:["Optimis","Petualang","Jujur","Cerdas","Humoris","Filosofis"],
+    weaknesses:["Tidak Sabar","Kasar","Tidak Komitmen","Terlalu Jujur","Ceroboh"],
+    career:"Traveler, Guide, Dosen, Penulis, Atlet Outdoor", love:"Butuh kebebasan, jujur, benci dikekang, petualang cinta", finance:"Boros untuk traveling, tidak suka menabung, uang datang pergi" },
+  { name:"Capricorn", symbol:"♑", emoji:"🐐", dates:"22 Des - 19 Jan", element:"Tanah 🌍", planet:"Saturnus ♄", stone:"Garnet 🔴", color:"Coklat", numbers:"4, 8, 13, 22", day:"Sabtu",
+    desc:"Capricorn adalah pekerja keras yang ambisius, disiplin, dan sangat bertanggung jawab. Mereka memiliki visi jangka panjang dan tidak akan berhenti sampai mencapai puncak kesuksesan.",
+    strengths:["Ambisius","Disiplin","Bertanggung Jawab","Sabar","Strategis","Setia"],
+    weaknesses:["Kaku","Pesimis","Workaholic","Dingin","Materialistis"],
+    career:"CEO, Manager, Pengacara, Politisi, Entrepreneur", love:"Serius, setia, butuh pasangan yang ambisius juga", finance:"Sangat hemat, investor ulung, suka aset jangka panjang" },
+  { name:"Aquarius", symbol:"♒", emoji:"🏺", dates:"20 Jan - 18 Feb", element:"Udara 💨", planet:"Uranus ♅", stone:"Amethyst 💜", color:"Biru Elektrik", numbers:"4, 7, 11, 22", day:"Sabtu",
+    desc:"Aquarius adalah visioner yang unik, inovatif, dan berpikiran maju. Mereka peduli pada kemanusiaan, suka berpikir out-of-the-box, dan tidak takut berbeda dari orang lain.",
+    strengths:["Inovatif","Unik","Humanis","Cerdas","Independen","Progresif"],
+    weaknesses:["Dingin","Pemberontak","Tidak Emosional","Keras Kepala","Aneh"],
+    career:"Inventor, Scientist, Aktivis, Programmer, Humanitarian", love:"Butuh ruang pribadi, unik, cinta persahabatan dulu", finance:"Eksentrik, suka investasi teknologi, dermawan untuk sosial" },
+  { name:"Pisces", symbol:"♓", emoji:"🐟", dates:"19 Feb - 20 Mar", element:"Air 💧", planet:"Neptunus ♆", stone:"Aquamarine 💙", color:"Lavender", numbers:"3, 9, 12, 15", day:"Kamis",
+    desc:"Pisces adalah zodiak paling intuitif, kreatif, dan penuh empati. Mereka hidup dalam dunia imajinasi, sangat sensitif terhadap perasaan orang lain, dan memiliki jiwa seni yang tinggi.",
+    strengths:["Kreatif","Intuitif","Empatik","Romantis","Adaptif","Penyayang"],
+    weaknesses:["Mudah Terluka","Melamun","Tidak Realistis","Mudah Terpengaruh","Victim Mentality"],
+    career:"Seniman, Musisi, Terapis, Penulis, Fotografer", love:"Sangat romantis, butuh soulmate, rela berkorban", finance:"Boros untuk seni/hobi, sulit menabung, butuh bantuan finansial" }
+];
+
+const CHINESE_ZODIACS = [
+  { name:"Tikus", emoji:"🐀", traits:"Cerdas, cerdik, charm, ambisius", numbers:"2, 3", colors:"Biru, Emas, Hijau", best:"Naga, Monyet, Banteng" },
+  { name:"Banteng", emoji:"🐂", traits:"Jujur, pekerja keras, sabar, dapat diandalkan", numbers:"1, 4", colors:"Putih, Kuning, Hijau", best:"Tikus, Ular, Ayam" },
+  { name:"Macan", emoji:"🐅", traits:"Berani, percaya diri, kompetitif, tak terduga", numbers:"1, 3, 4", colors:"Biru, Abu-abu, Orange", best:"Kuda, Anjing, Babi" },
+  { name:"Kelinci", emoji:"🐇", traits:"Lembut, elegan, waspada, bertanggung jawab", numbers:"3, 4, 6", colors:"Merah, Pink, Ungu, Biru", best:"Kambing, Monyet, Anjing, Babi" },
+  { name:"Naga", emoji:"🐉", traits:"Kuasa, mulia, eksentrik, energik", numbers:"1, 6, 7", colors:"Emas, Perak, Abu-abu", best:"Tikus, Macan, Ular" },
+  { name:"Ular", emoji:"🐍", traits:"Bijaksana, misterius, intuitif, elegan", numbers:"2, 8, 9", colors:"Hitam, Merah, Kuning", best:"Banteng, Ayam, Naga" },
+  { name:"Kuda", emoji:"🐎", traits:"Ceria, aktif, energik, populer", numbers:"2, 3, 7", colors:"Kuning, Hijau", best:"Macan, Kambing, Anjing" },
+  { name:"Kambing", emoji:"🐐", traits:"Gentle, kreatif, penyayang, sensitif", numbers:"3, 9, 4", colors:"Hijau, Merah, Ungu", best:"Kelinci, Kuda, Babi" },
+  { name:"Monyet", emoji:"🐒", traits:"Cerdas, cerdik, ingin tahu, inovatif", numbers:"1, 7, 8", colors:"Putih, Emas, Biru", best:"Tikus, Naga, Kelinci" },
+  { name:"Ayam", emoji:"🐓", traits:"Jujur, energik, cerdas, flamboyan", numbers:"5, 7, 8", colors:"Emas, Coklat, Kuning", best:"Banteng, Ular, Naga" },
+  { name:"Anjing", emoji:"🐕", traits:"Loyal, jujur, prudent, baik hati", numbers:"3, 4, 9", colors:"Hijau, Merah, Ungu", best:"Kelinci, Macan, Kuda" },
+  { name:"Babi", emoji:"🐖", traits:"Tulus, murah hati, sabar, optimis", numbers:"2, 5, 8", colors:"Kuning, Abu-abu, Coklat, Emas", best:"Kelinci, Kambing, Macan" }
+];
+
+const CHINESE_ELEMENTS = ["Logam 🪙","Air 💧","Kayu 🌳","Api 🔥","Tanah 🌍"];
+
+let currentZodiac = null;
+
+function getZodiac(day, month) {
+  const dates = [[20,1],[19,2],[21,3],[20,4],[21,5],[21,6],[23,7],[23,8],[23,9],[23,10],[22,11],[22,12]];
+  if (day < dates[month-1][0]) return ZODIACS[(month+10)%12];
+  return ZODIACS[(month+11)%12];
+}
+
+function getChineseZodiac(year) {
+  const idx = (year - 4) % 12;
+  return CHINESE_ZODIACS[idx < 0 ? idx+12 : idx];
+}
+
+function getChineseElement(year) {
+  const idx = Math.floor((year - 4) % 10 / 2);
+  return CHINESE_ELEMENTS[idx];
+}
+
+function calculate() {
+  const day = parseInt(document.getElementById('day').value);
+  const month = parseInt(document.getElementById('month').value);
+  const year = parseInt(document.getElementById('year').value);
+  const err = document.getElementById('error');
+
+  if (!day || !month || !year) {
+    err.textContent = "⚠️ Mohon isi semua field tanggal lahir";
+    err.classList.remove('hidden');
+    return;
+  }
+  if (day < 1 || day > 31 || month < 1 || month > 12) {
+    err.textContent = "⚠️ Tanggal tidak valid";
+    err.classList.remove('hidden');
+    return;
+  }
+
+  err.classList.add('hidden');
+  currentZodiac = getZodiac(day, month);
+  const chinese = getChineseZodiac(year);
+  const chineseEl = getChineseElement(year);
+
+  // Main info
+  document.getElementById('mainSymbol').textContent = currentZodiac.emoji;
+  document.getElementById('mainName').textContent = currentZodiac.name + " " + currentZodiac.symbol;
+  document.getElementById('mainDate').textContent = currentZodiac.dates;
+  document.getElementById('infoPlanet').textContent = currentZodiac.planet;
+  document.getElementById('infoElement').textContent = currentZodiac.element;
+  document.getElementById('infoStone').textContent = currentZodiac.stone;
+  document.getElementById('infoColor').textContent = currentZodiac.color;
+  document.getElementById('infoNumbers').textContent = currentZodiac.numbers;
+  document.getElementById('infoDay').textContent = currentZodiac.day;
+
+  // Traits
+  document.getElementById('traitDesc').textContent = currentZodiac.desc;
+  document.getElementById('traitStrengths').innerHTML = currentZodiac.strengths.map(s => `<span class="trait-chip px-3 py-1 rounded-full text-xs">${s}</span>`).join('');
+  document.getElementById('traitWeaknesses').innerHTML = currentZodiac.weaknesses.map(s => `<span class="trait-chip px-3 py-1 rounded-full text-xs">${s}</span>`).join('');
+  document.getElementById('traitCareer').textContent = currentZodiac.career;
+  document.getElementById('traitLove').textContent = currentZodiac.love;
+  document.getElementById('traitFinance').textContent = currentZodiac.finance;
+
+  // Chinese
+  document.getElementById('chineseSymbol').textContent = chinese.emoji;
+  document.getElementById('chineseName').textContent = "Shio " + chinese.name;
+  document.getElementById('chineseElement').textContent = "Elemen: " + chineseEl;
+  document.getElementById('chineseYinYang').textContent = year % 2 === 0 ? "☯️ Yang (Positif)" : "☯️ Yin (Negatif)";
+  document.getElementById('chineseTraits').textContent = chinese.traits;
+  document.getElementById('chineseNumbers').textContent = chinese.numbers;
+  document.getElementById('chineseColors').textContent = chinese.colors;
+  document.getElementById('chineseBestMatch').textContent = chinese.best;
+
+  // Compatibility
+  const myIdx = ZODIACS.indexOf(currentZodiac);
+  const compatScores = ZODIACS.map((z, i) => {
+    let score = 50;
+    const sameElem = z.element === currentZodiac.element;
+    const diff = Math.abs(i - myIdx);
+    if (sameElem) score += 25;
+    if (diff === 4 || diff === 8) score += 20; // trine
+    if (diff === 6) score -= 20; // opposite
+    if (diff === 3 || diff === 9) score -= 10; // square
+    if (diff === 0) score = 100;
+    if (i === (myIdx+4)%12 || i === (myIdx+8)%12) score = Math.max(score, 85);
+    return { zodiac: z, score: Math.min(100, Math.max(20, score)) };
+  });
+  compatScores.sort((a,b) => b.score - a.score);
+  document.getElementById('compatList').innerHTML = compatScores.map(c => `
+    <div class="bg-black/30 rounded-xl p-4 flex items-center gap-4">
+      <div class="text-3xl">${c.zodiac.emoji}</div>
+      <div class="flex-1">
+        <div class="flex justify-between mb-1">
+          <span class="font-semibold">${c.zodiac.name}</span>
+          <span class="text-pink-400 font-bold">${c.score}%</span>
+        </div>
+        <div class="h-2 bg-black/50 rounded-full overflow-hidden">
+          <div class="compat-bar h-full rounded-full" style="width:${c.score}%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // All zodiacs
+  document.getElementById('allZodiacs').innerHTML = ZODIACS.map(z => `
+    <div class="zodiac-card bg-black/30 rounded-2xl p-4 border border-white/10 cursor-pointer" onclick="selectZodiac('${z.name}')">
+      <div class="text-4xl text-center mb-2">${z.emoji}</div>
+      <div class="text-center font-bold text-pink-400">${z.name} ${z.symbol}</div>
+      <div class="text-center text-xs text-gray-400 mt-1">${z.dates}</div>
+      <div class="text-center text-xs text-gray-500 mt-1">${z.element}</div>
+    </div>
+  `).join('');
+
+  // Build wheel
+  buildWheel();
+
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildWheel() {
+  const wheel = document.getElementById('zodiacWheel');
+  wheel.innerHTML = '';
+  const radius = 130;
+  ZODIACS.forEach((z, i) => {
+    const angle = (i * 30 - 90) * Math.PI / 180;
+    const x = 160 + radius * Math.cos(angle) - 25;
+    const y = 160 + radius * Math.sin(angle) - 25;
+    const div = document.createElement('div');
+    div.className = 'wheel-sign' + (currentZodiac && currentZodiac.name === z.name ? ' active' : '');
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    div.textContent = z.symbol;
+    div.title = z.name;
+    div.onclick = () => selectZodiac(z.name);
+    wheel.appendChild(div);
+  });
+  // Center
+  const center = document.createElement('div');
+  center.className = 'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center';
+  center.innerHTML = currentZodiac ? `<div class="text-5xl">${currentZodiac.emoji}</div><div class="text-xs text-purple-300 mt-1">${currentZodiac.name}</div>` : '';
+  wheel.appendChild(center);
+}
+
+function selectZodiac(name) {
+  const z = ZODIACS.find(x => x.name === name);
+  if (!z) return;
+  currentZodiac = z;
+  document.getElementById('mainSymbol').textContent = z.emoji;
+  document.getElementById('mainName').textContent = z.name + " " + z.symbol;
+  document.getElementById('mainDate').textContent = z.dates;
+  document.getElementById('infoPlanet').textContent = z.planet;
+  document.getElementById('infoElement').textContent = z.element;
+  document.getElementById('infoStone').textContent = z.stone;
+  document.getElementById('infoColor').textContent = z.color;
+  document.getElementById('infoNumbers').textContent = z.numbers;
+  document.getElementById('infoDay').textContent = z.day;
+  document.getElementById('traitDesc').textContent = z.desc;
+  document.getElementById('traitStrengths').innerHTML = z.strengths.map(s => `<span class="trait-chip px-3 py-1 rounded-full text-xs">${s}</span>`).join('');
+  document.getElementById('traitWeaknesses').innerHTML = z.weaknesses.map(s => `<span class="trait-chip px-3 py-1 rounded-full text-xs">${s}</span>`).join('');
+  document.getElementById('traitCareer').textContent = z.career;
+  document.getElementById('traitLove').textContent = z.love;
+  document.getElementById('traitFinance').textContent = z.finance;
+  buildWheel();
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('tab-active');
+    btn.classList.add('bg-black/40');
+  });
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('tab-active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.remove('bg-black/40');
+}
+</script>
+</body>
+</html>
